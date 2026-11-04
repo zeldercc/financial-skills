@@ -28,6 +28,7 @@ financial-skills/
       technical-playbook.md
       stock-selection.md
       price-action-and-exits.md
+      multi-timeframe-and-chips.md
       historical-notes.md
     templates/
       stock-analysis.md
@@ -36,9 +37,11 @@ financial-skills/
       validate_skill.py
       analyze_ohlcv.py
       screen_watchlist.py
+      analyze_multitimeframe.py
   tests/test_skill.py
   tests/test_technical_analysis.py
   tests/test_watchlist_screening.py
+  tests/test_multitimeframe.py
   README.md
   NOTICE.md
   .gitignore
@@ -100,6 +103,43 @@ python .agents/skills/mi-sky-investing/scripts/screen_watchlist.py ./ohlcv/ --as
 ~~~
 
 目录内每个CSV用股票代码命名，如600536.SH.csv，列名与OHLCV分析脚本一致。输出仅是**技术候选及不满足条件记录**，不代表真实机构持仓，不完成财报、估值筛选，更不直接构成交易指令。原文中部分数值阈值仅来自2025年的一篇文章，不能当作统一有效策略。
+
+## v1.3.0：多周期支撑压力、均线粘合与筹码成本
+
+详细规则在 `references/multi-timeframe-and-chips.md`，包括：
+1. 5、30、60、120分钟及日、周、月七级别联动，先月周定方向，日线找结构，分钟级别定位候选买卖区。
+2. 各级MA5/10/20/60及其斜率；MA5/10/20离散度，用于观察均线粘合到发散的变化；粘合阈值仅由用户另行指定。
+3. 前高前低、已确认摆动点、各级均线的候选支撑压力与跨级别近价位聚合；不能凭单一周期确认周/月反转。
+4. 分离“历史成交量按价分布”与外部数据商估计的“持仓筹码成本分布”。筹码估计必须提供数据日期和模型来源，不可把5分钟OHLCV模拟为实际持有人成本。
+
+A股完整5分钟K线应使用Asia/Shanghai时区的本地**K线开始时间**，并有如下CSV列：
+
+~~~csv
+timestamp,open,high,low,close,volume
+2026-11-04T09:30,10.00,10.12,9.99,10.08,18000
+~~~
+
+该行**仅为CSV格式演示，不是真实行情**，不能在投资分析中当作实际数据。
+
+~~~bash
+python .agents/skills/mi-sky-investing/scripts/analyze_multitimeframe.py ./bars_5m.csv \
+  --ma-convergence-pct 1.0 \
+  --zone-tolerance-pct 0.5
+~~~
+
+以上两个百分数属于**用户研究参数**，并非Mi姐原文规定。
+
+若另有数据商提供的筹码成本CSV（列`price,weight`），可额外加入：
+
+~~~bash
+  --chip-profile ./chips.csv --chip-asof 2026-11-03 --chip-model "来源与估算方法"
+~~~
+
+脚本不会抓取行情或验证数据商来源；会拒绝周末5分钟K线、排除不完整交易日的高级别确认，并采用保守的周/月收盘规则。近240根5分钟K线的成交量分桶仅为粗略的价位成交量分布，**并非真实筹码成本数据**。
+
+[上海证券交易所交易规则（2026年修订）](https://www.sse.com.cn/lawandrules/sselawsrules2025/trade/universal/c/c_20260424_10816492.shtml)；
+[TradingView Volume Profile官方解释](https://www.tradingview.com/support/solutions/43000502040-volume-profile-indicators-basic-concepts/)；
+[富途牛牛筹码分布说明](https://support.futunn.com/topic585?from_platform=1&lang=zh-cn)。
 
 ## 原始资料的管理
 
