@@ -24,9 +24,9 @@ else:
   for rel in refs:
     if not (HERE/rel).is_file():errors.append('unresolved reference: '+rel)
   if len(t.splitlines())>500:errors.append('SKILL.md over 500 lines')
-for fn in ('core-methodology.md','source-index.md','evidence-protocol.md','decision-process.md','historical-notes.md','technical-playbook.md','stock-selection.md','price-action-and-exits.md','multi-timeframe-and-chips.md'):
+for fn in ('core-methodology.md','source-index.md','evidence-protocol.md','decision-process.md','historical-notes.md','technical-playbook.md','stock-selection.md','price-action-and-exits.md','multi-timeframe-and-chips.md','chanlun-framework.md','unified-decision-framework.md'):
   if not (HERE/'references'/fn).exists():errors.append('missing '+fn)
-for scriptname in ('analyze_ohlcv.py','screen_watchlist.py','analyze_multitimeframe.py'):
+for scriptname in ('analyze_ohlcv.py','screen_watchlist.py','analyze_multitimeframe.py','chan_segment_check.py'):
   script=HERE/'scripts'/scriptname
   if not script.is_file():errors.append('missing analyzer '+scriptname)
   else:
@@ -37,10 +37,11 @@ with (HERE/'templates/opinion-ledger.csv').open(encoding='utf-8',newline='') as 
   for req in ('claim_id','claimed_at','source_key','falsifier','status'):
     if req not in cols:errors.append('missing ledger column '+req)
 source=(HERE/'references/source-index.md').read_text(encoding='utf-8')
-for key in ('M01','M08','T00','T08','A01','A02','W01','W02','K01','P01','P03','B01','B02'):
+for key in ('M01','M08','T00','T08','A01','A02','W01','W02','K01','P01','P03','B01','B02','C01','C02'):
   if f'`{key}`' not in source:errors.append('missing source code '+key)
+if '目录中共34个文件' not in source:errors.append('source inventory must reflect 34 Drive items')
 if errors:
   print('FAILED:')
   for e in errors:print(' - '+e)
   sys.exit(1)
-print('PASS: frontmatter, paths, references, source index, 3 scripts syntax and ledger fields valid')
+print('PASS: Skill structure, 34-item index, original-source boundaries, 4 script syntax and ledger schema valid')
