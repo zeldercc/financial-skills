@@ -122,7 +122,13 @@
 
 可运行工具：scripts/analyze_ohlcv.py。它读取用户提供的日/周/月 CSV，计算SMA与相对量能，给出候选结构和数据缺口。**它不抓取实时行情、不自动下单，也不根据未验证阈值生成“确定买卖”指令。**
 
-## 8. 外部资料与一致性校验（非作者来源）
+## 8. 关联实操模块
+
+- `stock-selection.md`：原文第196条的强势股指标、股性分类、月线主升/周线W底筛选、涨停情绪短线分支及RPS口径限制。
+- `price-action-and-exits.md`：上涨/下降/震荡状态、趋势回踩、W底/头肩底/平台突破、七种卖点、移动止盈、复杂调整与缠论口径冲突。
+- `scripts/screen_watchlist.py`：多股CSV的技术观察，**不直接推荐买卖**；必须核对行业、财报、估值与完整市场信息。
+
+## 9. 外部资料与一致性校验（非作者来源）
 
 - 上海证券交易所技术资料展示了均线、均量线的常见计算思路，但不证明某套策略有效：https://www.sse.com.cn/services/tradingtech/transaction/c/10759678/files/b614f93b7d53473cb129d8bdb7f2905a.pdf
 - 台湾统一证券技术分析帮助页将价格与成交量作为技术研究输入：https://www.pscnet.com.tw/pscnetStock/tradingManual.do?manual_id=38952647f90000066286&manual_second_id=396819737500000193cf&platform_id=platform01
