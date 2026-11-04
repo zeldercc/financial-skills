@@ -24,9 +24,9 @@ else:
   for rel in refs:
     if not (HERE/rel).is_file():errors.append('unresolved reference: '+rel)
   if len(t.splitlines())>500:errors.append('SKILL.md over 500 lines')
-for fn in ('core-methodology.md','source-index.md','evidence-protocol.md','decision-process.md','historical-notes.md','technical-playbook.md','stock-selection.md','price-action-and-exits.md','multi-timeframe-and-chips.md','chanlun-framework.md','unified-decision-framework.md'):
+for fn in ('core-methodology.md','source-index.md','evidence-protocol.md','decision-process.md','historical-notes.md','technical-playbook.md','stock-selection.md','price-action-and-exits.md','multi-timeframe-and-chips.md','chanlun-framework.md','unified-decision-framework.md','source-sync-audit-2026-11-04.md'):
   if not (HERE/'references'/fn).exists():errors.append('missing '+fn)
-for scriptname in ('analyze_ohlcv.py','screen_watchlist.py','analyze_multitimeframe.py','chan_segment_check.py'):
+for scriptname in ('analyze_ohlcv.py','screen_watchlist.py','analyze_multitimeframe.py','chan_segment_check.py','check_chan_setup.py'):
   script=HERE/'scripts'/scriptname
   if not script.is_file():errors.append('missing analyzer '+scriptname)
   else:
@@ -44,4 +44,4 @@ if errors:
   print('FAILED:')
   for e in errors:print(' - '+e)
   sys.exit(1)
-print('PASS: Skill structure, 34-item index, original-source boundaries, 4 script syntax and ledger schema valid')
+print('PASS: Skill structure, 34-item index, original-source boundaries, 5 script syntax and ledger schema valid')
