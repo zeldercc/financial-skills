@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Standard-library structural and integrity check for the Mi-Sky Agent Skill."""
 from pathlib import Path
-import re,sys,csv
+import re,sys,csv,ast
 
 HERE=Path(__file__).resolve().parents[1]
 ROOT=HERE.parents[2]
@@ -24,8 +24,13 @@ else:
   for rel in refs:
     if not (HERE/rel).is_file():errors.append('unresolved reference: '+rel)
   if len(t.splitlines())>500:errors.append('SKILL.md over 500 lines')
-for fn in ('core-methodology.md','source-index.md','evidence-protocol.md','decision-process.md','historical-notes.md'):
+for fn in ('core-methodology.md','source-index.md','evidence-protocol.md','decision-process.md','historical-notes.md','technical-playbook.md'):
   if not (HERE/'references'/fn).exists():errors.append('missing '+fn)
+script=HERE/'scripts/analyze_ohlcv.py'
+if not script.is_file():errors.append('missing OHLCV analyzer')
+else:
+  try:ast.parse(script.read_text(encoding='utf-8'),filename=str(script))
+  except SyntaxError as ex:errors.append('OHLCV analyzer syntax error: '+str(ex))
 with (HERE/'templates/opinion-ledger.csv').open(encoding='utf-8',newline='') as f:
   cols=next(csv.reader(f))
   for req in ('claim_id','claimed_at','source_key','falsifier','status'):
@@ -37,4 +42,4 @@ if errors:
   print('FAILED:')
   for e in errors:print(' - '+e)
   sys.exit(1)
-print('PASS: frontmatter, paths, references, source index and ledger fields valid')
+print('PASS: frontmatter, paths, references, source index, OHLCV script syntax and ledger fields valid')
