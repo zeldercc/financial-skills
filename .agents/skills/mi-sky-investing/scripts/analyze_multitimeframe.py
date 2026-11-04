@@ -52,6 +52,8 @@ def load_5m(path, as_of=None):
                 raise ValueError(f"第{line}行timestamp无效") from exc
             if moment.tzinfo is not None:
                 raise ValueError("时间须为Asia/Shanghai本地无时区偏移格式，避免静默时区变换")
+            if moment.weekday() >= 5:
+                raise ValueError(f"第{line}行为非周一至周五的日期，无法作为A股正常交易日")
             if previous is not None and moment <= previous:
                 raise ValueError("K线起始时间须严格递增且不能重复")
             previous = moment
@@ -316,6 +318,8 @@ def confluence(groups, tolerance_pct):
 
 
 def analyze(rows,args):
+    if args.chip_profile and args.chip_asof and dt.date.fromisoformat(args.chip_asof) > dt.date.fromisoformat(rows[-1]["date"]):
+        raise ValueError("筹码分布模型日期晚于已取得行情，禁止使用未来数据")
     timeframes,quality=make_timeframes(rows)
     readings={tf:technical(timeframes[tf],args.ma_convergence_pct) for tf in ALL_TIMEFRAMES}
     profile=volume_profile(rows,args.profile_bars,args.profile_bins)
