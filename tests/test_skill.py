@@ -38,9 +38,18 @@ class TestSkill(unittest.TestCase):
     for phrase in ("ZD", "ZG", "次级别", "首次", "三买", "三卖"):
       self.assertIn(phrase,theory)
     main=(S/"SKILL.md").read_text(encoding="utf-8")
-    self.assertIn('version: "1.4.0"',main)
+    self.assertIn('version: "1.5.0"',main)
     self.assertIn("chanlun-framework.md",main)
     self.assertIn("unified-decision-framework.md",main)
+  def test_new_source_sync_and_strict_chan_checker(self):
+    self.assertTrue((S/"references/source-sync-audit-2026-11-04.md").is_file())
+    self.assertTrue((S/"scripts/check_chan_setup.py").is_file())
+    self.assertTrue((S/"references/unified-decision-framework.md").is_file())
+    source=(S/"references/source-index.md").read_text(encoding="utf-8")
+    self.assertIn("34个文件",source)
+    main=(S/"SKILL.md").read_text(encoding="utf-8")
+    self.assertIn("check_chan_setup.py",main)
+    self.assertIn("source-sync-audit-2026-11-04.md",main)
   def test_provenance_distinction(self):
     t=(S/'SKILL.md').read_text(encoding='utf-8')
     for tag in ('[作者原意]','[框架推演]','[外部事实]'):
