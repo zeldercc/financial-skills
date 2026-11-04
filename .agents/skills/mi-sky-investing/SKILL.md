@@ -2,7 +2,7 @@
 name: mi-sky-investing
 description: 基于 Mi姐（Sky/Mistery）历史会议纪要、交易复盘和推文，以可溯源的宏观、大盘、行业周期、个股估值、均线MA、量能、量价、趋势结构、资金与风险纪律分析 A 股、港股或其他股票；用于个股研究、买卖条件推演、持仓复盘和更新作者思想。
 metadata:
-  version: "1.4.0"
+  version: "1.5.0"
   language: zh-CN
 ---
 
@@ -16,7 +16,7 @@ metadata:
 
 ## 激活时先读取
 
-**首先读取 `references/unified-decision-framework.md`，以该文件作为完整决策流程，不得仅从某一个指标直接下结论。**
+**首先读取 `references/unified-decision-framework.md`，以该文件作为完整决策流程，不得仅从某一个指标直接下结论。用户要求同步Google Drive更新时，还要读取 `references/source-sync-audit-2026-11-04.md` 与 `references/source-index.md` 核对来源数量、版本、重复和未验证修改。**
 
 1. `references/core-methodology.md`：作者方法归纳和准确出处。
 2. `references/evidence-protocol.md`：证据分级、时间轴、重复资料、真实性和反证。
@@ -26,7 +26,7 @@ metadata:
 6. 如已获得OHLCV历史数据，使用 `scripts/analyze_ohlcv.py` 生成量化诊断，报告计算方法、参数假设、真实观察日期与尚未确认的信号。
 7. 若提供多只股票的OHLCV CSV，可运行 `scripts/screen_watchlist.py` 批量检索趋势候选，逐项报告MA20/60/120、VMA5/10、RSI/MACD及数据缺口；**无完整股票池不能生成全市场RPS**。脚本不能代替基本面筛选和执行价判断。
 8. **凡涉及5分钟、30分钟、60分钟、120分钟、日/周/月多个K线级别、不同级别支撑/压力、均线粘合/发散、筹码峰/筹码成本或成交密集区，必须读取 `references/multi-timeframe-and-chips.md`。若已提供完整A股5分钟OHLCV，使用 `scripts/analyze_multitimeframe.py` 计算七级别独立均线、斜率/离散度、结构高低点、候选共振价带；不能凭日线合成分钟线。**
-9. **凡涉及缠论、走势中枢、分型/笔/线段、背驰、区间套、一买二买三买或卖点，必须读取 `references/chanlun-framework.md`；其理论原典来自独立于Mi姐的C01/C02，不得将她的箱体回踩简化表述误当原典中的严格三买。`scripts/chan_segment_check.py`只检查人工已完成次级走势段的几何条件，不自动生成严格缠论结构。**
+9. **凡涉及缠论、走势中枢、分型/笔/线段、背驰、区间套、一买二买三买或卖点，必须读取 `references/chanlun-framework.md`；其理论原典来自独立于Mi姐的C01/C02，不得将她的箱体回踩简化表述误当原典中的严格三买。`scripts/chan_segment_check.py`对人工分段作宽松几何候选筛查；如用户已提供已严格审查的中枢边界与五段完整次级走势，可进一步使用 `scripts/check_chan_setup.py` 检查明确的ZD/ZG、首次离开/回试和边界条件。两个脚本都不自动认证正式三买。**
 10. 按需读取 `references/source-index.md` 和 `references/historical-notes.md`。
 11. 输出个股报告时使用 `templates/stock-analysis.md`。
 
@@ -136,6 +136,14 @@ metadata:
 - 当资料存在“买入位置/技术止损”与“长线持股/忽略波动”两种表述，先明确投资模式：短线技术止损和中长线基本面失效不能互相替代。
 - 对“主力意图”“必然”“确定”等缺乏独立数据支持的表达，按作者推测处理，不能升级为客观事实。
 - 当作者早期预测与现实冲突，必须保留历史原文和验证结论，不得悄悄改写。
+
+## 资料增量校核与版本纪律
+
+- 当前来源目录为34份资料（28 PDF、1 DOCX、5 JPG），比上一版增加两本缠论书稿；3份2026年10月推文合集在2026-11-04重新上传，但Drive当前未提供可读取的旧修订，不能声称已逐句比对差异。
+- 新资料C01《缠中说禅·股市技术理论》（编订本）、C02《教你炒股票108课》（原始课程汇编），只用于核对外部理论，并非Mi姐本人新发表的股市判断。
+- 与旧材料冲突时依证据层级处理：Mi姐原话引用T/P/M，缠论严格术语依据C02第20课并参考C01编订版；实时买卖判断必须另查最新官方财务与行情。
+- 中枢计算应区分正式经完整次级走势核验的ZD/ZG，以及价格区间求交的几何proxy；普通箱体突破不允许自动称为三买。
+- 每次修改source-index、规则和脚本后复核README/模板/测试并记录commit，不复制受版权保护的整篇文稿或书籍。
 
 ## 适用边界
 
