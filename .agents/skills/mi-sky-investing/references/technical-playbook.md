@@ -128,6 +128,8 @@
 - `price-action-and-exits.md`：上涨/下降/震荡状态、趋势回踩、W底/头肩底/平台突破、七种卖点、移动止盈、复杂调整与缠论口径冲突。
 - `scripts/screen_watchlist.py`：多股CSV的技术观察，**不直接推荐买卖**；必须核对行业、财报、估值与完整市场信息。
 
+- `multi-timeframe-and-chips.md`：5/30/60/120分钟及日周月K线级别联立、同级均线粘合、各级前高前低支撑压力、筹码成本与历史成交量价分布差异；对应离线程序 `scripts/analyze_multitimeframe.py`。
+
 ## 9. 外部资料与一致性校验（非作者来源）
 
 - 上海证券交易所技术资料展示了均线、均量线的常见计算思路，但不证明某套策略有效：https://www.sse.com.cn/services/tradingtech/transaction/c/10759678/files/b614f93b7d53473cb129d8bdb7f2905a.pdf
