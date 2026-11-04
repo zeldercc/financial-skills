@@ -29,6 +29,8 @@ financial-skills/
       stock-selection.md
       price-action-and-exits.md
       multi-timeframe-and-chips.md
+      chanlun-framework.md
+      unified-decision-framework.md
       historical-notes.md
     templates/
       stock-analysis.md
@@ -38,10 +40,12 @@ financial-skills/
       analyze_ohlcv.py
       screen_watchlist.py
       analyze_multitimeframe.py
+      chan_segment_check.py
   tests/test_skill.py
   tests/test_technical_analysis.py
   tests/test_watchlist_screening.py
   tests/test_multitimeframe.py
+  tests/test_chan_structure.py
   README.md
   NOTICE.md
   .gitignore
@@ -143,6 +147,49 @@ python .agents/skills/mi-sky-investing/scripts/analyze_multitimeframe.py ./bars_
 [富途牛牛筹码分布说明](https://support.futunn.com/topic585?from_platform=1&lang=zh-cn)。
 
 [富途牛牛筹码分布入口及数据含义](https://support.futunn.com/topic585?from_platform=1&lang=zh-cn)可辅助取得该指标，但脚本不会直接读取富途账户；需提供CSV及来源。
+
+
+## v1.4.0：2026-11-04云盘更新后的重新梳理
+
+2026-11-04再次扫描用户指定的Google Drive文件夹，记录到**34个文件（28份PDF、1份DOCX、5张JPG）**。与v1.3.0的32项目录相比，新增两份缠论相关资料：
+
+- C01：《缠中说禅：股市技术理论》，理论编订资料，含分型、笔、线段、中枢、背驰和三类买卖点。
+- C02：《缠中说禅：教你炒股票108课》，原始课程的PDF汇编；文字提取有部分乱码，准确术语需与C01和公开原课交叉核对。
+
+**三种内容必须分开**：
+1. Mi姐（Sky/Mistery）2025至2026年整理资料中的投资思想、产业周期、均线、选股和交易经验。
+2. 独立于Mi姐的缠中说禅原始理论及编订教材，尤其是完整次级别走势、中枢ZD/ZG与一二三类买卖点的严格定义。
+3. 用于实操的市场数据计算约定，例如MA离散度、RVOL、价格支撑聚合、成交量价分桶及完整K线分时合成。
+
+### 新增模块
+
+- **统一操作流程**：references/unified-decision-framework.md。按市场→行业→估值与股性→七级别K线→支撑压力与筹码→普通买卖点/缠论双轨→退出与复盘。
+- **缠论原典与Mi姐应用比较**：references/chanlun-framework.md。明确三买须有已形成中枢、完成的次级走势向上离开后首次回试不跌破中枢上沿ZG；三卖反向，注意中枢下沿ZD。
+- **次级走势几何校验**：scripts/chan_segment_check.py。只对外部事先分段、已完成、同级的次级走势段检查价格区间重叠及候选三买/三卖模板。它**不从OHLCV自动识别缠论笔、线段或严格走势级别**，输出不代表真实可交易的缠论信号。
+
+### 缠论分段检查示例
+
+人工划分次级走势段CSV需列：
+~~~csv
+end_time,level,direction,low,high,completed
+~~~
+
+要求每段的level相同，direction为up或down、交替，completed必须为true，end_time严格递增且为交易所当地时间。这些分段须先按**书面固定的包含关系、分型、笔、线段及走势类型规则**进行外部校验。
+
+~~~bash
+python .agents/skills/mi-sky-investing/scripts/chan_segment_check.py \
+  ./completed_legs.csv \
+  --source "本人审查后的人工分段数据" \
+  --segment-method "已声明并固定的分型、笔、线段与走势划分版本"
+~~~
+
+程序仅输出几何候选，不会自动确认证券买卖点；缺少完整的次级走势结构时，个股研究必须写“严格缠论不可判定”。
+
+### 与现有模块的关系
+
+v1.1均线与量价、v1.2选股及买卖点、v1.3七周期支撑压力/筹码分布全部保留。**v1.4新增严格缠论理论校核和统一决策流程，并修正把箱体回踩当“三买”的潜在误用。**原教材中“100%”等表达不代表经回测的实盘胜率。
+
+详见[来源索引](.agents/skills/mi-sky-investing/references/source-index.md)及[证据规则](.agents/skills/mi-sky-investing/references/evidence-protocol.md)。
 
 ## 原始资料的管理
 
