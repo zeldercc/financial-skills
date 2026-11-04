@@ -6,6 +6,12 @@ class TestSkill(unittest.TestCase):
   def test_structure(self):
     self.assertTrue((S/'SKILL.md').is_file())
     self.assertTrue((S/'references/core-methodology.md').is_file())
+  def test_technical_operation_exists(self):
+    self.assertTrue((S/"references/technical-playbook.md").is_file())
+    self.assertTrue((S/"scripts/analyze_ohlcv.py").is_file())
+    body=(S/"references/technical-playbook.md").read_text(encoding="utf-8")
+    for phrase in ("MA5", "MA20", "RVOL20", "520战法", "成交量", "右侧抄底"):
+      self.assertIn(phrase,body)
   def test_provenance_distinction(self):
     t=(S/'SKILL.md').read_text(encoding='utf-8')
     for tag in ('[作者原意]','[框架推演]','[外部事实]'):
