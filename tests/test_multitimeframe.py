@@ -18,6 +18,8 @@ def sample_bars(days=6, omit=None):
     bars=[]
     for d in range(days):
         date=dt.date(2026,10,26)+dt.timedelta(days=d)
+        if days>5 and date.weekday()>=5:
+            date+=dt.timedelta(days=7-date.weekday())
         for session,hour,minute in (("morning",9,30),("afternoon",13,0)):
             origin=dt.datetime.combine(date,dt.time(hour,minute))
             for slot in range(24):
@@ -63,8 +65,8 @@ class MultiTimeframeTest(unittest.TestCase):
     def test_current_week_month_not_marked_finished(self):
         tf,_=mod.make_timeframes(sample_bars(days=6))
         self.assertEqual(len(tf["daily"]),6)
-        self.assertEqual(len(tf["weekly"]),0)  # 10/26-10/31同一ISO周，未见下一周，保守不确认
-        self.assertEqual(len(tf["monthly"]),0)
+        self.assertEqual(len(tf["weekly"]),1)  # 11/02后可以确认10/26所在周
+        self.assertEqual(len(tf["monthly"]),1)  # 11月出现后可确认10月
 
     def test_ma_convergence_needs_user_threshold(self):
         data=[{"time":f"t{i}","open":10,"high":10.1,"low":9.9,"close":10,"volume":100} for i in range(66)]
@@ -97,6 +99,13 @@ class MultiTimeframeTest(unittest.TestCase):
         self.assertEqual(len(highs),1)
         self.assertEqual(highs[0]["price"],14)
         self.assertEqual(highs[0]["confirmed_at"],"4")
+
+    def test_weekend_csv_is_rejected(self):
+        with tempfile.TemporaryDirectory() as td:
+            p=Path(td)/"bars.csv"
+            p.write_text("timestamp,open,high,low,close,volume\n2026-10-31T09:30,10,11,9,10,100\n",encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "非周一至周五"):
+                mod.load_5m(p)
 
     def test_complete_multi_timeframe_result_no_chip_fabrication(self):
         x=mod.analyze(sample_bars(days=2),args())
