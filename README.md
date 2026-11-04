@@ -132,14 +132,17 @@ python .agents/skills/mi-sky-investing/scripts/analyze_multitimeframe.py ./bars_
 若另有数据商提供的筹码成本CSV（列`price,weight`），可额外加入：
 
 ~~~bash
-  --chip-profile ./chips.csv --chip-asof 2026-11-03 --chip-model "来源与估算方法"
+  --chip-profile ./chips.csv --chip-asof 2026-11-03 --chip-model "来源与估算方法" \
+  --chip-prev-profile ./chips_previous.csv --chip-prev-asof 2026-10-31
 ~~~
 
-脚本不会抓取行情或验证数据商来源；会拒绝周末5分钟K线、排除不完整交易日的高级别确认，并采用保守的周/月收盘规则。近240根5分钟K线的成交量分桶仅为粗略的价位成交量分布，**并非真实筹码成本数据**。
+脚本不会抓取行情或验证数据商来源；会拒绝周末5分钟K线、排除不完整交易日的高级别确认，并采用保守的周/月收盘规则。筹码模型可选提供两个不同日期的同源价格分布快照，以对比模型成本峰迁移。近240根5分钟K线的成交量分桶仅为粗略的价位成交量分布，**并非真实筹码成本数据**。
 
 [上海证券交易所交易规则（2026年修订）](https://www.sse.com.cn/lawandrules/sselawsrules2025/trade/universal/c/c_20260424_10816492.shtml)；
 [TradingView Volume Profile官方解释](https://www.tradingview.com/support/solutions/43000502040-volume-profile-indicators-basic-concepts/)；
 [富途牛牛筹码分布说明](https://support.futunn.com/topic585?from_platform=1&lang=zh-cn)。
+
+[富途牛牛筹码分布入口及数据含义](https://support.futunn.com/topic585?from_platform=1&lang=zh-cn)可辅助取得该指标，但脚本不会直接读取富途账户；需提供CSV及来源。
 
 ## 原始资料的管理
 
