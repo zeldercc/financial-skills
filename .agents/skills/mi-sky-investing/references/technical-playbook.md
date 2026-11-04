@@ -130,6 +130,9 @@
 
 - `multi-timeframe-and-chips.md`：5/30/60/120分钟及日周月K线级别联立、同级均线粘合、各级前高前低支撑压力、筹码成本与历史成交量价分布差异；对应离线程序 `scripts/analyze_multitimeframe.py`。
 
+- `chanlun-framework.md`：新增C01/C02原典下中枢、分型、笔、线段、背驰、区间套和三类买卖点；凡Mi姐的普通突破/回踩被称为“三买”，必须另核次级别完整走势结构，缺数据不能认证。独立几何校验程序 `scripts/chan_segment_check.py`。
+- `unified-decision-framework.md`：将全部原始哲学、选股、七级别指标、筹码和严格缠论分双轨合并成标准研究/风控流程。
+
 ## 9. 外部资料与一致性校验（非作者来源）
 
 - 上海证券交易所技术资料展示了均线、均量线的常见计算思路，但不证明某套策略有效：https://www.sse.com.cn/services/tradingtech/transaction/c/10759678/files/b614f93b7d53473cb129d8bdb7f2905a.pdf
