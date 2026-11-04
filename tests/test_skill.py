@@ -24,6 +24,23 @@ class TestSkill(unittest.TestCase):
     guide=(S/"references/multi-timeframe-and-chips.md").read_text(encoding="utf-8")
     for word in ("120分钟", "5分钟", "均线粘合", "筹码成本分布", "已完成"):
       self.assertIn(word,guide)
+  def test_new_2026_11_04_source_audit_and_theory_boundaries(self):
+    idx=(S/"references/source-index.md").read_text(encoding="utf-8")
+    self.assertIn("目录中共34个文件",idx)
+    for tag in ("C01", "C02"):
+      self.assertIn(tag,idx)
+    for p in ("references/chanlun-framework.md", "references/unified-decision-framework.md",
+              "scripts/chan_segment_check.py"):
+      self.assertTrue((S/p).is_file(),p)
+    protocol=(S/"references/evidence-protocol.md").read_text(encoding="utf-8")
+    self.assertIn("独立",protocol)
+    theory=(S/"references/chanlun-framework.md").read_text(encoding="utf-8")
+    for phrase in ("ZD", "ZG", "次级别", "首次", "三买", "三卖"):
+      self.assertIn(phrase,theory)
+    main=(S/"SKILL.md").read_text(encoding="utf-8")
+    self.assertIn('version: "1.4.0"',main)
+    self.assertIn("chanlun-framework.md",main)
+    self.assertIn("unified-decision-framework.md",main)
   def test_provenance_distinction(self):
     t=(S/'SKILL.md').read_text(encoding='utf-8')
     for tag in ('[作者原意]','[框架推演]','[外部事实]'):
