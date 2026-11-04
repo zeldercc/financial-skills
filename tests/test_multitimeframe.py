@@ -37,7 +37,8 @@ def sample_bars(days=6, omit=None):
 def args(**kwargs):
     defaults={"ma_convergence_pct":None,"zone_tolerance_pct":None,
               "profile_bars":240,"profile_bins":40,"chip_profile":None,
-              "chip_asof":None,"chip_model":None}
+              "chip_asof":None,"chip_model":None,
+              "chip_prev_profile":None,"chip_prev_asof":None}
     defaults.update(kwargs)
     return SimpleNamespace(**defaults)
 
@@ -75,6 +76,9 @@ class MultiTimeframeTest(unittest.TestCase):
         self.assertIsNone(a["ma_convergence"]["within_user_threshold"])
         b=mod.technical(data,0.5)
         self.assertEqual(b["ma_convergence"]["within_user_threshold"],True)
+        self.assertEqual(a["atr14"],0.2)
+        self.assertEqual(a["rsi14"],50.0)
+        self.assertEqual(a["bollinger20_2sigma"]["width_pct"],0.0)
 
     def test_profile_and_chip_are_distinct(self):
         data=sample_bars(days=2)
@@ -89,6 +93,19 @@ class MultiTimeframeTest(unittest.TestCase):
             self.assertEqual(chip["kind"],"external_estimated_holding_cost_model")
             with self.assertRaises(ValueError):
                 mod.load_chip_csv(p,None,"missing_date")
+
+    def test_chip_poc_migration_requires_two_snapshots(self):
+        with tempfile.TemporaryDirectory() as td:
+            old=Path(td)/"old.csv"
+            new=Path(td)/"new.csv"
+            old.write_text("price,weight\n10,100\n11,10\n",encoding="utf-8")
+            new.write_text("price,weight\n10,20\n11,100\n",encoding="utf-8")
+            result=mod.analyze(sample_bars(days=2),args(chip_profile=new,
+                chip_asof="2026-10-27",chip_model="Synthetic source",
+                chip_prev_profile=old,chip_prev_asof="2026-10-26",zone_tolerance_pct=1.0))
+            self.assertEqual(result["chip_poc_change_price_units"],1)
+            self.assertTrue(result["estimated_chip_cost_profile"])
+            self.assertTrue(result["previous_estimated_chip_cost_profile"])
 
     def test_pivots_only_confirm_after_two_right_bars(self):
         bars=[]
