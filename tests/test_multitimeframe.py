@@ -63,7 +63,7 @@ class MultiTimeframeTest(unittest.TestCase):
     def test_current_week_month_not_marked_finished(self):
         tf,_=mod.make_timeframes(sample_bars(days=6))
         self.assertEqual(len(tf["daily"]),6)
-        self.assertEqual(len(tf["weekly"]),1)  # 10/26-11/01与11/02-11/01假设跨周，见下行
+        self.assertEqual(len(tf["weekly"]),0)  # 10/26-10/31同一ISO周，未见下一周，保守不确认
         self.assertEqual(len(tf["monthly"]),0)
 
     def test_ma_convergence_needs_user_threshold(self):
