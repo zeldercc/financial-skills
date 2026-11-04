@@ -24,9 +24,9 @@ else:
   for rel in refs:
     if not (HERE/rel).is_file():errors.append('unresolved reference: '+rel)
   if len(t.splitlines())>500:errors.append('SKILL.md over 500 lines')
-for fn in ('core-methodology.md','source-index.md','evidence-protocol.md','decision-process.md','historical-notes.md','technical-playbook.md','stock-selection.md','price-action-and-exits.md'):
+for fn in ('core-methodology.md','source-index.md','evidence-protocol.md','decision-process.md','historical-notes.md','technical-playbook.md','stock-selection.md','price-action-and-exits.md','multi-timeframe-and-chips.md'):
   if not (HERE/'references'/fn).exists():errors.append('missing '+fn)
-for scriptname in ('analyze_ohlcv.py','screen_watchlist.py'):
+for scriptname in ('analyze_ohlcv.py','screen_watchlist.py','analyze_multitimeframe.py'):
   script=HERE/'scripts'/scriptname
   if not script.is_file():errors.append('missing analyzer '+scriptname)
   else:
@@ -43,4 +43,4 @@ if errors:
   print('FAILED:')
   for e in errors:print(' - '+e)
   sys.exit(1)
-print('PASS: frontmatter, paths, references, source index, OHLCV script syntax and ledger fields valid')
+print('PASS: frontmatter, paths, references, source index, 3 scripts syntax and ledger fields valid')
