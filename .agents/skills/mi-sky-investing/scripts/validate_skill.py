@@ -24,13 +24,14 @@ else:
   for rel in refs:
     if not (HERE/rel).is_file():errors.append('unresolved reference: '+rel)
   if len(t.splitlines())>500:errors.append('SKILL.md over 500 lines')
-for fn in ('core-methodology.md','source-index.md','evidence-protocol.md','decision-process.md','historical-notes.md','technical-playbook.md'):
+for fn in ('core-methodology.md','source-index.md','evidence-protocol.md','decision-process.md','historical-notes.md','technical-playbook.md','stock-selection.md','price-action-and-exits.md'):
   if not (HERE/'references'/fn).exists():errors.append('missing '+fn)
-script=HERE/'scripts/analyze_ohlcv.py'
-if not script.is_file():errors.append('missing OHLCV analyzer')
-else:
-  try:ast.parse(script.read_text(encoding='utf-8'),filename=str(script))
-  except SyntaxError as ex:errors.append('OHLCV analyzer syntax error: '+str(ex))
+for scriptname in ('analyze_ohlcv.py','screen_watchlist.py'):
+  script=HERE/'scripts'/scriptname
+  if not script.is_file():errors.append('missing analyzer '+scriptname)
+  else:
+    try:ast.parse(script.read_text(encoding='utf-8'),filename=str(script))
+    except SyntaxError as ex:errors.append(scriptname+' syntax error: '+str(ex))
 with (HERE/'templates/opinion-ledger.csv').open(encoding='utf-8',newline='') as f:
   cols=next(csv.reader(f))
   for req in ('claim_id','claimed_at','source_key','falsifier','status'):
