@@ -26,6 +26,8 @@ financial-skills/
       evidence-protocol.md
       decision-process.md
       technical-playbook.md
+      stock-selection.md
+      price-action-and-exits.md
       historical-notes.md
     templates/
       stock-analysis.md
@@ -33,8 +35,10 @@ financial-skills/
     scripts/
       validate_skill.py
       analyze_ohlcv.py
+      screen_watchlist.py
   tests/test_skill.py
   tests/test_technical_analysis.py
+  tests/test_watchlist_screening.py
   README.md
   NOTICE.md
   .gitignore
@@ -80,6 +84,22 @@ date,open,high,low,close,volume
 研究时可直接询问：
 
 > 使用 mi-sky-investing 分析中科曙光。按最新真实价格给出MA5/10/20/60/120/250、均量与RVOL20、MACD、前高前低和支撑压力；指出是否满足520战法、是否存在放量突破与缩量回踩、右侧确认处于哪一步，并将未完成条件、失效位置和证据来源列清楚。
+
+## 新增：股票池筛选与买卖点
+
+v1.2.0 新增可溯源的选股与操作规则：
+
+- `references/stock-selection.md`：T00第196条的强势股筛选参数、股性分类、月线长期箱体与周线W底候选、RPS口径限制。
+- `references/price-action-and-exits.md`：涨跌趋势/震荡区间识别、五类买点、七类卖点、突破后1至3根K线的确认观察、移动止盈、缠论术语冲突。
+- `scripts/screen_watchlist.py`：按本地股票CSV目录批量输出MA20/60/120、VMA5/10、RSI、MACD及是否满足历史技术筛选参数；明确缺失数据和“不能计算完整市场RPS”。
+
+使用方法：
+
+~~~bash
+python .agents/skills/mi-sky-investing/scripts/screen_watchlist.py ./ohlcv/ --as-of 2026-11-04
+~~~
+
+目录内每个CSV用股票代码命名，如600536.SH.csv，列名与OHLCV分析脚本一致。输出仅是**技术候选及不满足条件记录**，不代表真实机构持仓，不完成财报、估值筛选，更不直接构成交易指令。原文中部分数值阈值仅来自2025年的一篇文章，不能当作统一有效策略。
 
 ## 原始资料的管理
 
