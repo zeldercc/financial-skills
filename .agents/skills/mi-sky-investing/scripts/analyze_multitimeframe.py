@@ -147,6 +147,49 @@ def macd(values):
             "histogram":round6(2*(dif[-1]-signal[-1]))}
 
 
+
+def rsi14(values):
+    if len(values) < 15:
+        return None
+    differences=[values[i]-values[i-1] for i in range(1,len(values))]
+    gains=[max(0.0,x) for x in differences]
+    losses=[max(0.0,-x) for x in differences]
+    avg_gain=sum(gains[:14])/14
+    avg_loss=sum(losses[:14])/14
+    for gain,loss in zip(gains[14:],losses[14:]):
+        avg_gain=(avg_gain*13+gain)/14
+        avg_loss=(avg_loss*13+loss)/14
+    if avg_loss==0:
+        return 100.0 if avg_gain>0 else 50.0
+    return round6(100-100/(1+avg_gain/avg_loss))
+
+
+def atr14(bars):
+    if len(bars)<15:
+        return None
+    tr=[]
+    for i in range(1,len(bars)):
+        b=bars[i]
+        prev=bars[i-1]["close"]
+        tr.append(max(b["high"]-b["low"],abs(b["high"]-prev),abs(b["low"]-prev)))
+    atr=sum(tr[:14])/14
+    for value in tr[14:]:
+        atr=(13*atr+value)/14
+    return round6(atr)
+
+
+def bollinger20_width(values):
+    if len(values)<20:
+        return None
+    last=values[-20:]
+    mean=sum(last)/20
+    if mean==0:
+        return None
+    sigma=math.sqrt(sum((x-mean)**2 for x in last)/20)
+    return {"middle":round6(mean),"upper":round6(mean+2*sigma),
+            "lower":round6(mean-2*sigma),
+            "width_pct":round6(4*sigma/abs(mean)*100)}
+
 def pivots(bars, left=2, right=2):
     if len(bars) < left+right+1:
         return []
@@ -214,6 +257,8 @@ def technical(bars, convergence_threshold=None):
                           "within_user_threshold":disparity<=convergence_threshold if disparity is not None and convergence_threshold is not None else None},
         "volume":{"current":vol[-1],"rvol20_prior_bars":round6(vol[-1]/pv) if pv else None},
         "macd_12_26_9":macd(close),
+        "rsi14":rsi14(close),"atr14":atr14(bars),
+        "bollinger20_2sigma":bollinger20_width(close),
         "nearest_support_candidates":sup,"nearest_resistance_candidates":res,
         "pivot_rule":"left2/right2 completed bars; no lookahead",
         "notes":["只为候选支撑/压力，实际有效性需后续K线验证","指标级别与交易级别必须一致"]
@@ -289,7 +334,7 @@ def load_chip_csv(path, chip_asof, chip_model):
     return result
 
 
-def confluence(groups, tolerance_pct):
+def confluence(groups, tolerance_pct, volume_info=None, chip_info=None):
     if tolerance_pct is None:
         return {"status":"no_user_tolerance","clusters":[]}
     prices=[]
@@ -297,6 +342,12 @@ def confluence(groups, tolerance_pct):
         for side in ("nearest_support_candidates","nearest_resistance_candidates"):
             for level in groups[tf].get(side,[]):
                 prices.append({"timeframe":tf,"side":side,"type":level["type"],"price":level["price"]})
+    if volume_info is not None and volume_info.get("POC") is not None:
+        prices.append({"timeframe":"volume_profile_approx","side":"price_volume_node",
+                       "type":"historical_volume_POC","price":volume_info["POC"]})
+    if chip_info is not None and chip_info.get("POC") is not None:
+        prices.append({"timeframe":"chip_cost_model","side":"estimated_cost_node",
+                       "type":"estimated_chip_cost_POC","price":chip_info["POC"]})
     prices.sort(key=lambda x:x["price"])
     clusters=[]
     for level in prices:
@@ -308,11 +359,13 @@ def confluence(groups, tolerance_pct):
             cluster["mean"]=sum(x["price"] for x in cluster["members"])/len(cluster["members"])
     result=[]
     for cluster in clusters:
-        frames=sorted({x["timeframe"] for x in cluster["members"]})
-        if len(frames)>1:
+        frames=sorted({x["timeframe"] for x in cluster["members"] if x["timeframe"] in ALL_TIMEFRAMES})
+        kinds=sorted({x["timeframe"] for x in cluster["members"]})
+        if len(kinds)>1:
             result.append({"zone_low":round6(min(x["price"] for x in cluster["members"])),
                            "zone_high":round6(max(x["price"] for x in cluster["members"])),
-                           "timeframes":frames,"levels":cluster["members"]})
+                           "timeframes":frames,"distinct_data_sources":kinds,
+                           "levels":cluster["members"]})
     return {"status":"multi_timeframe_level_proximity_only_not_probability",
             "user_tolerance_pct":tolerance_pct,"clusters":result}
 
@@ -324,11 +377,16 @@ def analyze(rows,args):
     readings={tf:technical(timeframes[tf],args.ma_convergence_pct) for tf in ALL_TIMEFRAMES}
     profile=volume_profile(rows,args.profile_bars,args.profile_bins)
     chips=load_chip_csv(args.chip_profile,args.chip_asof,args.chip_model) if args.chip_profile else None
+    prev_chip=load_chip_csv(args.chip_prev_profile,args.chip_prev_asof,args.chip_model) if args.chip_prev_profile else None
+    if prev_chip is not None and chips is not None and args.chip_prev_asof>=args.chip_asof:
+        raise ValueError("上期筹码模型日期必须早于当前模型日期")
+    drift=round6(chips["POC"]-prev_chip["POC"]) if chips and prev_chip else None
     return {"source":"user_supplied_completed_5m_ohlcv","exchange_timezone":"Asia/Shanghai",
             "reference_session":"09:30-11:30,13:00-15:00; 120m does not cross lunch",
             "timeframes":readings,"quality":quality,
-            "cross_timeframe_levels":confluence(readings,args.zone_tolerance_pct),
+            "cross_timeframe_levels":confluence(readings,args.zone_tolerance_pct,profile,chips),
             "executed_volume_profile_approx":profile,"estimated_chip_cost_profile":chips,
+            "previous_estimated_chip_cost_profile":prev_chip,"chip_poc_change_price_units":drift,
             "warning":["5分钟OHLCV的价量分桶不是真实持仓筹码分布",
                        "多周期同步/均线粘合只反映过去数据，不保证后续上涨",
                        "周/月周期保守排除尚未观察到下一周期的当期K线",
@@ -354,16 +412,24 @@ def main():
     p.add_argument("--chip-profile",type=Path,help="来自外部数据商的筹码成本估计CSV，需price,weight")
     p.add_argument("--chip-asof",help="成本分布数据日期YYYY-MM-DD")
     p.add_argument("--chip-model",help="成本分布供应商及模型名称")
+    p.add_argument("--chip-prev-profile",type=Path,help="可选上期筹码成本价格权重CSV")
+    p.add_argument("--chip-prev-asof",help="上期筹码模型数据日期YYYY-MM-DD")
     args=p.parse_args()
     try:
         if args.as_of is not None and args.as_of.tzinfo is not None:
             raise ValueError("--as-of须为Asia/Shanghai本地无时区偏移时间")
         if args.profile_bars<1 or not 4<=args.profile_bins<=400:
             raise ValueError("profile-bars应>=1且profile-bins须在4~400")
+        if args.chip_prev_profile and (not args.chip_profile or not args.chip_prev_asof):
+            raise ValueError("要比较筹码变化须有当前模型及--chip-prev-asof")
+        if args.chip_prev_asof and not args.chip_prev_profile:
+            raise ValueError("提供上期筹码日期时须有上期筹码CSV")
         if args.chip_profile is None and (args.chip_asof or args.chip_model):
             raise ValueError("提供--chip-asof/--chip-model时必须同时提供--chip-profile")
         if args.chip_asof:
             dt.date.fromisoformat(args.chip_asof)
+        if args.chip_prev_asof:
+            dt.date.fromisoformat(args.chip_prev_asof)
         rows=load_5m(args.ohlcv_5m,args.as_of)
         print(json.dumps(analyze(rows,args),ensure_ascii=False,indent=2))
     except (OSError,ValueError) as exc:
