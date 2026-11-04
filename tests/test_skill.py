@@ -12,6 +12,12 @@ class TestSkill(unittest.TestCase):
     body=(S/"references/technical-playbook.md").read_text(encoding="utf-8")
     for phrase in ("MA5", "MA20", "RVOL20", "520战法", "成交量", "右侧抄底"):
       self.assertIn(phrase,body)
+  def test_screening_and_entry_exit_guides(self):
+    for file in ("references/stock-selection.md", "references/price-action-and-exits.md", "scripts/screen_watchlist.py"):
+      self.assertTrue((S/file).is_file(), file)
+    sk=(S/"SKILL.md").read_text(encoding="utf-8")
+    for phrase in ("stock-selection.md", "price-action-and-exits.md", "screen_watchlist.py", "1.2.0"):
+      self.assertIn(phrase,sk)
   def test_provenance_distinction(self):
     t=(S/'SKILL.md').read_text(encoding='utf-8')
     for tag in ('[作者原意]','[框架推演]','[外部事实]'):
