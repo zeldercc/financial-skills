@@ -1,0 +1,23 @@
+import sys,unittest,subprocess
+from pathlib import Path
+ROOT=Path(__file__).resolve().parents[1]
+S=ROOT/'.agents/skills/mi-sky-investing'
+class TestSkill(unittest.TestCase):
+  def test_structure(self):
+    self.assertTrue((S/'SKILL.md').is_file())
+    self.assertTrue((S/'references/core-methodology.md').is_file())
+  def test_provenance_distinction(self):
+    t=(S/'SKILL.md').read_text(encoding='utf-8')
+    for tag in ('[作者原意]','[框架推演]','[外部事实]'):
+      self.assertIn(tag,t)
+  def test_risk_and_no_invented_live_data(self):
+    t=(S/'SKILL.md').read_text(encoding='utf-8')
+    for phrase in ('不得编造','反证','左侧','右侧','仓位','来源'):
+      self.assertIn(phrase,t)
+  def test_source_not_duplicated(self):
+    s=(S/'references/source-index.md').read_text(encoding='utf-8')
+    self.assertIn('不能重复计权',s)
+  def test_validator(self):
+    p=subprocess.run([sys.executable,str(S/'scripts/validate_skill.py')],capture_output=True,text=True)
+    self.assertEqual(p.returncode,0,p.stdout+p.stderr)
+if __name__=='__main__':unittest.main()

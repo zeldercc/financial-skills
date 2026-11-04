@@ -1,0 +1,16 @@
+# Never commit private research dumps, credentials, historical source downloads.
+*.pdf
+*.docx
+*.jpg
+*.jpeg
+*.png
+*.zip
+*.env
+.env*
+*.local.md
+private/
+raw/
+source-files/
+__pycache__/
+*.pyc
+.DS_Store
