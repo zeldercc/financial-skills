@@ -31,6 +31,7 @@ financial-skills/
       multi-timeframe-and-chips.md
       chanlun-framework.md
       unified-decision-framework.md
+      source-sync-audit-2026-11-04.md
       historical-notes.md
     templates/
       stock-analysis.md
@@ -41,11 +42,13 @@ financial-skills/
       screen_watchlist.py
       analyze_multitimeframe.py
       chan_segment_check.py
+      check_chan_setup.py
   tests/test_skill.py
   tests/test_technical_analysis.py
   tests/test_watchlist_screening.py
   tests/test_multitimeframe.py
   tests/test_chan_structure.py
+  tests/test_chan_setup.py
   README.md
   NOTICE.md
   .gitignore
@@ -190,6 +193,35 @@ python .agents/skills/mi-sky-investing/scripts/chan_segment_check.py \
 v1.1均线与量价、v1.2选股及买卖点、v1.3七周期支撑压力/筹码分布全部保留。**v1.4新增严格缠论理论校核和统一决策流程，并修正把箱体回踩当“三买”的潜在误用。**原教材中“100%”等表达不代表经回测的实盘胜率。
 
 详见[来源索引](.agents/skills/mi-sky-investing/references/source-index.md)及[证据规则](.agents/skills/mi-sky-investing/references/evidence-protocol.md)。
+
+## v1.5.0：Drive增量复核及缠论结构校验
+
+重新扫描了34份资料，新增的两份缠论教材已经纳入来源索引，10月三份推文汇编在2026-11-04出现更新记录，但Drive未返回可读取的上一版本，因此无法确认正文逐句变化。
+
+- 核验记录：references/source-sync-audit-2026-11-04.md。
+- 统一研究入口：references/unified-decision-framework.md。按大盘→行业→企业价值与估值→选股资格→月周日及分钟走势→均线/量能/筹码与支撑压力→普通买卖点/缠论两轨→仓位及失效条件逐层研究。
+- 原典和作者的表述差异：references/chanlun-framework.md。缠论中枢必须由至少三段连续、完整、经核验的次级别走势类型构成；普通平台突破和“均线粘合”均不等于缠论三买。
+- **宽松几何候选**：scripts/chan_segment_check.py 对用户提供的完整次级分段CSV做候选筛选，不认证正式缠论走势。
+- **更严格的个案边界核验**：scripts/check_chan_setup.py 要求输入人工已核验中枢的ZD/ZG、连续三段形成中枢的次级完整走势、离开段、首次回抽段，核对第三类买卖点的几何条件。该工具同样不独立确定走势级别或买卖点，也不下单。
+
+严格个案输入为JSON，关键字段包括parent_structure_level、sublevel_structure_level、zhongshu{ZD,ZG}、first_retest_verified以及依次具有role=zone1,zone2,zone3,departure,retest的五个segments。每段必须注明direction、low、high、structure_level、structure_type="completed_sublevel_movement_type"、start、end、completed=true、verified=true。**verified为使用者提交的证明状态，不代表程序已经核查过原始K线**。
+
+示例：
+
+~~~bash
+python .agents/skills/mi-sky-investing/scripts/check_chan_setup.py ./verified_structure.json
+~~~
+
+重要边界：ZD为中枢下沿，ZG为上沿，三买需要次级走势向上离开并首次完整回试低点不跌破ZG，三卖相反。三根K线区间重叠得出的几何价格代理，并非严格的缠论中枢价位。
+
+更新后可执行：
+
+~~~bash
+python .agents/skills/mi-sky-investing/scripts/validate_skill.py
+python -m unittest discover -s tests -v
+~~~
+
+新增代码带有数据不足、来源与结构不完整检查。算法输出是技术研究候选，不意味着作者当下荐股，也不代表预测成功率。
 
 ## 原始资料的管理
 
