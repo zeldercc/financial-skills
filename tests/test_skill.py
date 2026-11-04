@@ -18,6 +18,12 @@ class TestSkill(unittest.TestCase):
     sk=(S/"SKILL.md").read_text(encoding="utf-8")
     for phrase in ("stock-selection.md", "price-action-and-exits.md", "screen_watchlist.py", "1.2.0"):
       self.assertIn(phrase,sk)
+  def test_multitimeframe_profile_and_chip_protocol(self):
+    self.assertTrue((S/"references/multi-timeframe-and-chips.md").is_file())
+    self.assertTrue((S/"scripts/analyze_multitimeframe.py").is_file())
+    guide=(S/"references/multi-timeframe-and-chips.md").read_text(encoding="utf-8")
+    for word in ("120分钟", "5分钟", "均线粘合", "筹码成本分布", "已完成"):
+      self.assertIn(word,guide)
   def test_provenance_distinction(self):
     t=(S/'SKILL.md').read_text(encoding='utf-8')
     for tag in ('[作者原意]','[框架推演]','[外部事实]'):
