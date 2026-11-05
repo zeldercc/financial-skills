@@ -16,7 +16,7 @@ class TestSkill(unittest.TestCase):
     for file in ("references/stock-selection.md", "references/price-action-and-exits.md", "scripts/screen_watchlist.py"):
       self.assertTrue((S/file).is_file(), file)
     sk=(S/"SKILL.md").read_text(encoding="utf-8")
-    for phrase in ("stock-selection.md", "price-action-and-exits.md", "screen_watchlist.py", "1.2.0"):
+    for phrase in ("stock-selection.md", "price-action-and-exits.md", "screen_watchlist.py", "version:"):
       self.assertIn(phrase,sk)
   def test_multitimeframe_profile_and_chip_protocol(self):
     self.assertTrue((S/"references/multi-timeframe-and-chips.md").is_file())

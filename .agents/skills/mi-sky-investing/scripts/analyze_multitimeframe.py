@@ -108,7 +108,7 @@ def make_timeframes(bars):
     # current week/month cannot be proved closed based on this dataset alone.
     for name, key in (
         ("weekly",lambda x:dt.date.fromisoformat(x["time"]).isocalendar()[:2]),
-        ("monthly",lambda x:dt.date.fromisoformat(x["time"])[:7]),
+        ("monthly",lambda x:x["time"][:7]),
     ):
         slices = defaultdict(list)
         for bar in groups["daily"]:
